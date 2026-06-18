@@ -60,25 +60,16 @@ function TerminalNode({ data, selected }) {
 
 function buildFlow(data) {
   const declaredNodes = data.graph.nodes
-  const terminalEdges = data.graph.edges.filter(edge => !declaredNodes.some(node => node.id === edge.to))
-  const terminalTargetCounts = terminalEdges.reduce((counts, edge) => {
-    counts.set(edge.to, (counts.get(edge.to) || 0) + 1)
-    return counts
-  }, new Map())
-  const terminalDisplayNodes = terminalEdges.map(edge => {
-    const needsSplit = (terminalTargetCounts.get(edge.to) || 0) > 1
-    return {
-      id: needsSplit ? `${edge.to}_${edge.outcome}` : edge.to,
-      actualId: edge.to,
-      outcome: edge.outcome,
-    }
-  })
+  const terminalIds = [...new Set(data.graph.edges
+    .map(edge => edge.to)
+    .filter(id => !declaredNodes.some(node => node.id === id)))]
+  const terminalX = 80 + declaredNodes.length * 300 + 220
 
   const nodes = [
     ...declaredNodes.map((node, index) => ({
       id: node.id,
       type: 'harness',
-      position: { x: 80 + index * 330, y: 220 },
+      position: { x: 80 + index * 300, y: 260 },
       data: {
         id: node.id,
         label: node.id,
@@ -86,14 +77,14 @@ function buildFlow(data) {
         gate: node.gate,
       },
     })),
-    ...terminalDisplayNodes.map((terminal, index) => ({
-      id: terminal.id,
+    ...terminalIds.map((id, index) => ({
+      id,
       type: 'terminal',
-      position: { x: 560, y: 100 + index * 230 },
+      position: { x: terminalX, y: 140 + index * 220 },
       data: {
-        id: terminal.actualId,
-        label: terminal.id === terminal.actualId ? terminal.actualId : `${terminal.actualId} · ${terminal.outcome}`,
-        purpose: TERMINAL_PURPOSE[terminal.actualId] || 'Terminal route target.',
+        id,
+        label: id,
+        purpose: TERMINAL_PURPOSE[id] || 'Terminal route target.',
       },
     })),
   ]
@@ -106,7 +97,7 @@ function buildFlow(data) {
     return {
       id: `${edge.from}-${edge.outcome}-${edge.to}`,
       source: edge.from,
-      target: (terminalTargetCounts.get(edge.to) || 0) > 1 ? `${edge.to}_${edge.outcome}` : edge.to,
+      target: edge.to,
       label: edge.outcome,
       type: 'smoothstep',
       markerEnd: { type: MarkerType.ArrowClosed, color: OUTCOME_COLOR[edge.outcome] || '#86d67b' },

@@ -1,7 +1,35 @@
 flowchart TD
   00_intake["00_intake<br/>需求拷问与配置初始化"]
-  END["END"]
-  00_intake -->|pass| END
+  10_hotspot_scan["10_hotspot_scan<br/>扫描 6h AI/科技社区热点候选"]
+  20_topic_gate["20_topic_gate<br/>选题准入、论文源降权、单日节流"]
+  30_source_collect["30_source_collect<br/>采集一手资料与可信二手来源"]
+  40_evidence_analysis["40_evidence_analysis<br/>生成 L1/L2/L3 公共分析"]
+  50_draft_package["50_draft_package<br/>生成待审文章包"]
+  60_visual_plan["60_visual_plan<br/>生成配图方案和占位图计划"]
+  70_review_handoff["70_review_handoff<br/>输出人工审核交接"]
+  00_intake -->|pass| 10_hotspot_scan
   HUMAN["HUMAN"]
   00_intake -->|pause| HUMAN
+  END["END"]
   00_intake -->|fail| END
+  10_hotspot_scan -->|pass| 20_topic_gate
+  10_hotspot_scan -->|pause| HUMAN
+  10_hotspot_scan -->|fail| END
+  20_topic_gate -->|pass| 30_source_collect
+  20_topic_gate -->|pause| HUMAN
+  20_topic_gate -->|fail| END
+  30_source_collect -->|pass| 40_evidence_analysis
+  30_source_collect -->|pause| HUMAN
+  30_source_collect -->|fail| END
+  40_evidence_analysis -->|pass| 50_draft_package
+  40_evidence_analysis -->|pause| 30_source_collect
+  40_evidence_analysis -->|fail| END
+  50_draft_package -->|pass| 60_visual_plan
+  50_draft_package -->|pause| HUMAN
+  50_draft_package -->|fail| END
+  60_visual_plan -->|pass| 70_review_handoff
+  60_visual_plan -->|pause| 70_review_handoff
+  60_visual_plan -->|fail| 70_review_handoff
+  70_review_handoff -->|pass| END
+  70_review_handoff -->|pause| HUMAN
+  70_review_handoff -->|fail| END

@@ -13,37 +13,98 @@
 - `tools/*` 只是薄辅助层，用于校验结构、同步可视化投影、创建节点五件套。
 - `app/*` 是基于 `@xyflow/react` 的自研前端视图层，用来查看控制平面，不是事实源。
 
-本仓库必须独立于任何内容库、发布账号仓库、Obsidian 库、社媒运营项目或历史草稿语料。
+本仓库必须独立于任何内容库、发布账号仓库、Obsidian 库、社媒运营项目或历史草稿语料。业务数据、历史草稿、账号资料、cookies、真实 API key 只能存在调用方项目或本地 `.env`。
 
 ## Workflow Goal
 
-当前目标：提供一个轻量、可版本管理、可人工编辑的 agent workflow harness，让人类能像管理 n8n/Dify 工作流一样管理 agent 节点，但事实源是 Markdown 文件和模块目录，而不是平台数据库或 UI。
+当前业务 loop：AI/科技热点写作工作流。
+
+目标是在冷启动阶段保护有限推荐流，把每日写作产能集中到高互动、高分享、强冲突或强现实影响的 AI/科技热点上。论文源、arXiv、纯 benchmark、纯方法名默认降到最低优先级，只作为资料池；除非它们已经被社区、媒体或产品事件带起来，否则不进入主发文候选。
+
+输出只到 reviewable article package，不发布、不推后台草稿、不改账号设置。
 
 ## Current Graph
 
 ```mermaid
 flowchart TD
-  00_intake["00_intake<br/>需求拷问与配置初始化"]
-  END["END"]
-  00_intake -->|pass| END
-  HUMAN["HUMAN"]
-  00_intake -->|pause| HUMAN
-  00_intake -->|fail| END
+  intake["00_intake<br/>需求拷问与配置初始化"]
+  scan["10_hotspot_scan<br/>6h 热点候选扫描"]
+  topic["20_topic_gate<br/>选题准入与日预算门禁"]
+  collect["30_source_collect<br/>一手资料采集"]
+  analysis["40_evidence_analysis<br/>L1/L2/L3 公共分析"]
+  draft["50_draft_package<br/>待审文章包"]
+  visual["60_visual_plan<br/>配图与占位规划"]
+  handoff["70_review_handoff<br/>人工审核交接"]
+  human["HUMAN"]
+  end["END"]
+
+  intake -->|pass| scan
+  intake -->|pause| human
+  intake -->|fail| end
+  scan -->|pass| topic
+  scan -->|pause| human
+  scan -->|fail| end
+  topic -->|pass| collect
+  topic -->|pause| human
+  topic -->|fail| end
+  collect -->|pass| analysis
+  collect -->|pause| human
+  collect -->|fail| end
+  analysis -->|pass| draft
+  analysis -->|pause| collect
+  analysis -->|fail| end
+  draft -->|pass| visual
+  draft -->|pause| human
+  draft -->|fail| end
+  visual -->|pass| handoff
+  visual -->|pause| handoff
+  visual -->|fail| handoff
+  handoff -->|pass| end
+  handoff -->|pause| human
+  handoff -->|fail| end
 ```
 
 ## Node Index
 
-| Node | Folder | Purpose | Gate |
-|---|---|---|---|
-| 00_intake | `modules/00_intake/` | 需求拷问与配置初始化 | `modules/00_intake/GATE.md` |
+| Node                 | Folder                          | Purpose           | Gate                                   |
+| -------------------- | ------------------------------- | ----------------- | -------------------------------------- |
+| 00_intake            | `modules/00_intake/`            | 需求拷问与配置初始化        | `modules/00_intake/GATE.md`            |
+| 10_hotspot_scan      | `modules/10_hotspot_scan/`      | 扫描 6h AI/科技社区热点候选 | `modules/10_hotspot_scan/GATE.md`      |
+| 20_topic_gate        | `modules/20_topic_gate/`        | 选题准入、论文源降权、单日节流   | `modules/20_topic_gate/GATE.md`        |
+| 30_source_collect    | `modules/30_source_collect/`    | 采集一手资料与可信二手来源     | `modules/30_source_collect/GATE.md`    |
+| 40_evidence_analysis | `modules/40_evidence_analysis/` | 生成 L1/L2/L3 公共分析  | `modules/40_evidence_analysis/GATE.md` |
+| 50_draft_package     | `modules/50_draft_package/`     | 生成待审文章包           | `modules/50_draft_package/GATE.md`     |
+| 60_visual_plan       | `modules/60_visual_plan/`       | 生成配图方案和占位图计划      | `modules/60_visual_plan/GATE.md`       |
+| 70_review_handoff    | `modules/70_review_handoff/`    | 输出人工审核交接          | `modules/70_review_handoff/GATE.md`    |
 
 ## Edge Index
 
-| From | Outcome | To | Meaning |
-|---|---|---|---|
-| 00_intake | pass | END | 当前 loop 配置已经足够指导下一步实现或执行 |
-| 00_intake | pause | HUMAN | 需要人类补充高影响决策 |
-| 00_intake | fail | END | 初始化被终止，或事实源结构损坏到无法继续 |
+| From                 | Outcome | To                   | Meaning                      |
+| -------------------- | ------- | -------------------- | ---------------------------- |
+| 00_intake            | pass    | 10_hotspot_scan      | loop 配置足够，开始热点扫描             |
+| 00_intake            | pause   | HUMAN                | 需要人类补充配置决策                   |
+| 00_intake            | fail    | END                  | 初始化终止或事实源损坏                  |
+| 10_hotspot_scan      | pass    | 20_topic_gate        | 存在可评估候选                      |
+| 10_hotspot_scan      | pause   | HUMAN                | 候选太弱、全是论文源、或需要 fallback 决策   |
+| 10_hotspot_scan      | fail    | END                  | 没有可读候选来源                     |
+| 20_topic_gate        | pass    | 30_source_collect    | 选出一个值得消耗本轮产能的题               |
+| 20_topic_gate        | pause   | HUMAN                | 无题过线、日预算已满、或需人工拍板            |
+| 20_topic_gate        | fail    | END                  | 候选 artifact 缺失或不可读           |
+| 30_source_collect    | pass    | 40_evidence_analysis | 资料足够进入公共分析                   |
+| 30_source_collect    | pause   | HUMAN                | 缺关键一手来源或需授权采集                |
+| 30_source_collect    | fail    | END                  | 无可靠来源支撑                      |
+| 40_evidence_analysis | pass    | 50_draft_package     | L1/L2/L3 边界清楚，可写稿            |
+| 40_evidence_analysis | pause   | 30_source_collect    | 可补的一手资料缺口必须先补采               |
+| 40_evidence_analysis | fail    | END                  | 证据不足以支撑有用文章                  |
+| 50_draft_package     | pass    | 60_visual_plan       | 待审文章包已形成                     |
+| 50_draft_package     | pause   | HUMAN                | 结构、writer adapter 或关键事实需人类确认 |
+| 50_draft_package     | fail    | END                  | 无法从公共分析安全成稿                  |
+| 60_visual_plan       | pass    | 70_review_handoff    | 配图方案/占位计划可交审                 |
+| 60_visual_plan       | pause   | 70_review_handoff    | 图片 pending，但可作为待补图交接         |
+| 60_visual_plan       | fail    | 70_review_handoff    | 配图失败，记录 blocker 后交接          |
+| 70_review_handoff    | pass    | END                  | reviewable package 已交接       |
+| 70_review_handoff    | pause   | HUMAN                | 发布、上传或外部写入需人工授权              |
+| 70_review_handoff    | fail    | END                  | 必要文章 artifact 缺失             |
 
 ## Runtime Policy
 
@@ -57,6 +118,14 @@ Agent 接手后按这个顺序行动：
 6. 根据 `GATE.md` outcome 和本文件 `Edge Index` 路由。
 
 不要从聊天历史里猜 workflow。`LOOP.md` 和 `modules/*` 才是事实源。
+
+## Hotspot Policy
+
+- 论文源最低优先级：paper-only / arXiv-only / benchmark-only / method-name-only 默认只作背景资料。
+- 6h 社区热点优先：社区讨论、转发势能、争议、产品影响和用户痛点优先。
+- 单日节流：默认每天只推进 1 篇主稿，最多 2 篇可发布稿。
+- 热点优先于去 AI 味：先保证选题传播性，再做句层修正。
+- 只产出待审稿：发布、上传、推草稿、改账号设置均不在本 loop 内自动执行。
 
 ## State Policy
 
@@ -101,21 +170,7 @@ Agent 接手后按这个顺序行动：
 - 前端右侧 Codex CLI 面板通过 Vite 本地 bridge 调用 `codex exec`，不替代主 agent 会话。本机 Windows read-only sandbox 可能不可用，默认以 `CODEX_BRIDGE_SANDBOX` 或 `danger-full-access` 启动，并通过提示词约束只读不改文件。
 - 如果视图层和本文件冲突，以本文件和 `modules/*` 为准。
 
-同步 Mermaid：
-
-```powershell
-npm run sync:canvas
-```
-
-启动自研前端：
-
-```powershell
-npm run dev
-```
-
 ## Tools
-
-工具层只允许做结构辅助：
 
 ```powershell
 npm run validate
@@ -129,20 +184,20 @@ npm test
 工具层不得：
 
 - 自动调用模型；
-- 写业务选题规则；
 - 写平台账号/发布流程；
 - 成为 workflow 事实源；
 - 替代 agent 执行节点任务。
 
 ## Current Configuration Status
 
-- active_node: `modules/00_intake/`
-- initialized_nodes: `00_intake`
-- business_loop_nodes: 未创建
-- human_gate_required: true
-- runner_policy: `tools-only`
+- active_node: `modules/10_hotspot_scan/`
+- initialized_nodes: `00_intake`, `10_hotspot_scan`, `20_topic_gate`, `30_source_collect`, `40_evidence_analysis`, `50_draft_package`, `60_visual_plan`, `70_review_handoff`
+- business_loop: AI/科技热点写作
+- human_gate_required: true when gate outcome is `pause`
+- runner_policy: `agent-executed-text-harness`
+- publish_policy: `never publish automatically`
 
-当前只有 intake 节点。真实业务 loop 还没有初始化，下一步应继续用 `00_intake` 拷问人类并创建业务节点。
+当前 loop 已配置为热点写作工作流，但尚未绑定真实 source registry、writer adapter、image provider 或调用方内容仓路径。
 
 ## Maintenance Rules
 

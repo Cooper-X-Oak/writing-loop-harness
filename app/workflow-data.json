@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-18T09:43:15.514Z",
+  "generatedAt": "2026-06-18T14:27:44.963Z",
   "graph": {
     "nodes": [
       {
@@ -7,26 +7,194 @@
         "folder": "modules/00_intake",
         "purpose": "需求拷问与配置初始化",
         "gate": "modules/00_intake/GATE.md"
+      },
+      {
+        "id": "10_hotspot_scan",
+        "folder": "modules/10_hotspot_scan",
+        "purpose": "扫描 6h AI/科技社区热点候选",
+        "gate": "modules/10_hotspot_scan/GATE.md"
+      },
+      {
+        "id": "20_topic_gate",
+        "folder": "modules/20_topic_gate",
+        "purpose": "选题准入、论文源降权、单日节流",
+        "gate": "modules/20_topic_gate/GATE.md"
+      },
+      {
+        "id": "30_source_collect",
+        "folder": "modules/30_source_collect",
+        "purpose": "采集一手资料与可信二手来源",
+        "gate": "modules/30_source_collect/GATE.md"
+      },
+      {
+        "id": "40_evidence_analysis",
+        "folder": "modules/40_evidence_analysis",
+        "purpose": "生成 L1/L2/L3 公共分析",
+        "gate": "modules/40_evidence_analysis/GATE.md"
+      },
+      {
+        "id": "50_draft_package",
+        "folder": "modules/50_draft_package",
+        "purpose": "生成待审文章包",
+        "gate": "modules/50_draft_package/GATE.md"
+      },
+      {
+        "id": "60_visual_plan",
+        "folder": "modules/60_visual_plan",
+        "purpose": "生成配图方案和占位图计划",
+        "gate": "modules/60_visual_plan/GATE.md"
+      },
+      {
+        "id": "70_review_handoff",
+        "folder": "modules/70_review_handoff",
+        "purpose": "输出人工审核交接",
+        "gate": "modules/70_review_handoff/GATE.md"
       }
     ],
     "edges": [
       {
         "from": "00_intake",
         "outcome": "pass",
-        "to": "END",
-        "meaning": "当前 loop 配置已经足够指导下一步实现或执行"
+        "to": "10_hotspot_scan",
+        "meaning": "loop 配置足够，开始热点扫描"
       },
       {
         "from": "00_intake",
         "outcome": "pause",
         "to": "HUMAN",
-        "meaning": "需要人类补充高影响决策"
+        "meaning": "需要人类补充配置决策"
       },
       {
         "from": "00_intake",
         "outcome": "fail",
         "to": "END",
-        "meaning": "初始化被终止，或事实源结构损坏到无法继续"
+        "meaning": "初始化终止或事实源损坏"
+      },
+      {
+        "from": "10_hotspot_scan",
+        "outcome": "pass",
+        "to": "20_topic_gate",
+        "meaning": "存在可评估候选"
+      },
+      {
+        "from": "10_hotspot_scan",
+        "outcome": "pause",
+        "to": "HUMAN",
+        "meaning": "候选太弱、全是论文源、或需要 fallback 决策"
+      },
+      {
+        "from": "10_hotspot_scan",
+        "outcome": "fail",
+        "to": "END",
+        "meaning": "没有可读候选来源"
+      },
+      {
+        "from": "20_topic_gate",
+        "outcome": "pass",
+        "to": "30_source_collect",
+        "meaning": "选出一个值得消耗本轮产能的题"
+      },
+      {
+        "from": "20_topic_gate",
+        "outcome": "pause",
+        "to": "HUMAN",
+        "meaning": "无题过线、日预算已满、或需人工拍板"
+      },
+      {
+        "from": "20_topic_gate",
+        "outcome": "fail",
+        "to": "END",
+        "meaning": "候选 artifact 缺失或不可读"
+      },
+      {
+        "from": "30_source_collect",
+        "outcome": "pass",
+        "to": "40_evidence_analysis",
+        "meaning": "资料足够进入公共分析"
+      },
+      {
+        "from": "30_source_collect",
+        "outcome": "pause",
+        "to": "HUMAN",
+        "meaning": "缺关键一手来源或需授权采集"
+      },
+      {
+        "from": "30_source_collect",
+        "outcome": "fail",
+        "to": "END",
+        "meaning": "无可靠来源支撑"
+      },
+      {
+        "from": "40_evidence_analysis",
+        "outcome": "pass",
+        "to": "50_draft_package",
+        "meaning": "L1/L2/L3 边界清楚，可写稿"
+      },
+      {
+        "from": "40_evidence_analysis",
+        "outcome": "pause",
+        "to": "30_source_collect",
+        "meaning": "可补的一手资料缺口必须先补采"
+      },
+      {
+        "from": "40_evidence_analysis",
+        "outcome": "fail",
+        "to": "END",
+        "meaning": "证据不足以支撑有用文章"
+      },
+      {
+        "from": "50_draft_package",
+        "outcome": "pass",
+        "to": "60_visual_plan",
+        "meaning": "待审文章包已形成"
+      },
+      {
+        "from": "50_draft_package",
+        "outcome": "pause",
+        "to": "HUMAN",
+        "meaning": "结构、writer adapter 或关键事实需人类确认"
+      },
+      {
+        "from": "50_draft_package",
+        "outcome": "fail",
+        "to": "END",
+        "meaning": "无法从公共分析安全成稿"
+      },
+      {
+        "from": "60_visual_plan",
+        "outcome": "pass",
+        "to": "70_review_handoff",
+        "meaning": "配图方案/占位计划可交审"
+      },
+      {
+        "from": "60_visual_plan",
+        "outcome": "pause",
+        "to": "70_review_handoff",
+        "meaning": "图片 pending，但可作为待补图交接"
+      },
+      {
+        "from": "60_visual_plan",
+        "outcome": "fail",
+        "to": "70_review_handoff",
+        "meaning": "配图失败，记录 blocker 后交接"
+      },
+      {
+        "from": "70_review_handoff",
+        "outcome": "pass",
+        "to": "END",
+        "meaning": "reviewable package 已交接"
+      },
+      {
+        "from": "70_review_handoff",
+        "outcome": "pause",
+        "to": "HUMAN",
+        "meaning": "发布、上传或外部写入需人工授权"
+      },
+      {
+        "from": "70_review_handoff",
+        "outcome": "fail",
+        "to": "END",
+        "meaning": "必要文章 artifact 缺失"
       }
     ]
   },
@@ -60,6 +228,237 @@
         {
           "name": "GATE.md",
           "path": "modules/00_intake/GATE.md",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "10_hotspot_scan",
+      "folder": "modules/10_hotspot_scan",
+      "purpose": "扫描 6h AI/科技社区热点候选",
+      "gate": "modules/10_hotspot_scan/GATE.md",
+      "files": [
+        {
+          "name": "AGENTS.md",
+          "path": "modules/10_hotspot_scan/AGENTS.md",
+          "exists": true
+        },
+        {
+          "name": "NODE.md",
+          "path": "modules/10_hotspot_scan/NODE.md",
+          "exists": true
+        },
+        {
+          "name": "SYSTEM.md",
+          "path": "modules/10_hotspot_scan/SYSTEM.md",
+          "exists": true
+        },
+        {
+          "name": "CONTRACT.md",
+          "path": "modules/10_hotspot_scan/CONTRACT.md",
+          "exists": true
+        },
+        {
+          "name": "GATE.md",
+          "path": "modules/10_hotspot_scan/GATE.md",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "20_topic_gate",
+      "folder": "modules/20_topic_gate",
+      "purpose": "选题准入、论文源降权、单日节流",
+      "gate": "modules/20_topic_gate/GATE.md",
+      "files": [
+        {
+          "name": "AGENTS.md",
+          "path": "modules/20_topic_gate/AGENTS.md",
+          "exists": true
+        },
+        {
+          "name": "NODE.md",
+          "path": "modules/20_topic_gate/NODE.md",
+          "exists": true
+        },
+        {
+          "name": "SYSTEM.md",
+          "path": "modules/20_topic_gate/SYSTEM.md",
+          "exists": true
+        },
+        {
+          "name": "CONTRACT.md",
+          "path": "modules/20_topic_gate/CONTRACT.md",
+          "exists": true
+        },
+        {
+          "name": "GATE.md",
+          "path": "modules/20_topic_gate/GATE.md",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "30_source_collect",
+      "folder": "modules/30_source_collect",
+      "purpose": "采集一手资料与可信二手来源",
+      "gate": "modules/30_source_collect/GATE.md",
+      "files": [
+        {
+          "name": "AGENTS.md",
+          "path": "modules/30_source_collect/AGENTS.md",
+          "exists": true
+        },
+        {
+          "name": "NODE.md",
+          "path": "modules/30_source_collect/NODE.md",
+          "exists": true
+        },
+        {
+          "name": "SYSTEM.md",
+          "path": "modules/30_source_collect/SYSTEM.md",
+          "exists": true
+        },
+        {
+          "name": "CONTRACT.md",
+          "path": "modules/30_source_collect/CONTRACT.md",
+          "exists": true
+        },
+        {
+          "name": "GATE.md",
+          "path": "modules/30_source_collect/GATE.md",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "40_evidence_analysis",
+      "folder": "modules/40_evidence_analysis",
+      "purpose": "生成 L1/L2/L3 公共分析",
+      "gate": "modules/40_evidence_analysis/GATE.md",
+      "files": [
+        {
+          "name": "AGENTS.md",
+          "path": "modules/40_evidence_analysis/AGENTS.md",
+          "exists": true
+        },
+        {
+          "name": "NODE.md",
+          "path": "modules/40_evidence_analysis/NODE.md",
+          "exists": true
+        },
+        {
+          "name": "SYSTEM.md",
+          "path": "modules/40_evidence_analysis/SYSTEM.md",
+          "exists": true
+        },
+        {
+          "name": "CONTRACT.md",
+          "path": "modules/40_evidence_analysis/CONTRACT.md",
+          "exists": true
+        },
+        {
+          "name": "GATE.md",
+          "path": "modules/40_evidence_analysis/GATE.md",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "50_draft_package",
+      "folder": "modules/50_draft_package",
+      "purpose": "生成待审文章包",
+      "gate": "modules/50_draft_package/GATE.md",
+      "files": [
+        {
+          "name": "AGENTS.md",
+          "path": "modules/50_draft_package/AGENTS.md",
+          "exists": true
+        },
+        {
+          "name": "NODE.md",
+          "path": "modules/50_draft_package/NODE.md",
+          "exists": true
+        },
+        {
+          "name": "SYSTEM.md",
+          "path": "modules/50_draft_package/SYSTEM.md",
+          "exists": true
+        },
+        {
+          "name": "CONTRACT.md",
+          "path": "modules/50_draft_package/CONTRACT.md",
+          "exists": true
+        },
+        {
+          "name": "GATE.md",
+          "path": "modules/50_draft_package/GATE.md",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "60_visual_plan",
+      "folder": "modules/60_visual_plan",
+      "purpose": "生成配图方案和占位图计划",
+      "gate": "modules/60_visual_plan/GATE.md",
+      "files": [
+        {
+          "name": "AGENTS.md",
+          "path": "modules/60_visual_plan/AGENTS.md",
+          "exists": true
+        },
+        {
+          "name": "NODE.md",
+          "path": "modules/60_visual_plan/NODE.md",
+          "exists": true
+        },
+        {
+          "name": "SYSTEM.md",
+          "path": "modules/60_visual_plan/SYSTEM.md",
+          "exists": true
+        },
+        {
+          "name": "CONTRACT.md",
+          "path": "modules/60_visual_plan/CONTRACT.md",
+          "exists": true
+        },
+        {
+          "name": "GATE.md",
+          "path": "modules/60_visual_plan/GATE.md",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "70_review_handoff",
+      "folder": "modules/70_review_handoff",
+      "purpose": "输出人工审核交接",
+      "gate": "modules/70_review_handoff/GATE.md",
+      "files": [
+        {
+          "name": "AGENTS.md",
+          "path": "modules/70_review_handoff/AGENTS.md",
+          "exists": true
+        },
+        {
+          "name": "NODE.md",
+          "path": "modules/70_review_handoff/NODE.md",
+          "exists": true
+        },
+        {
+          "name": "SYSTEM.md",
+          "path": "modules/70_review_handoff/SYSTEM.md",
+          "exists": true
+        },
+        {
+          "name": "CONTRACT.md",
+          "path": "modules/70_review_handoff/CONTRACT.md",
+          "exists": true
+        },
+        {
+          "name": "GATE.md",
+          "path": "modules/70_review_handoff/GATE.md",
           "exists": true
         }
       ]
