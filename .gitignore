@@ -1,0 +1,6 @@
+node_modules/
+.runs/
+*.log
+.env
+.obsidian/
+app/dist/

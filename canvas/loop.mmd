@@ -1,0 +1,7 @@
+flowchart TD
+  00_intake["00_intake<br/>需求拷问与配置初始化"]
+  END["END"]
+  00_intake -->|pass| END
+  HUMAN["HUMAN"]
+  00_intake -->|pause| HUMAN
+  00_intake -->|fail| END

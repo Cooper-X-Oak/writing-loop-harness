@@ -1,0 +1,36 @@
+{
+	"nodes":[
+		{"id":"node","type":"file","file":"modules/00_intake/NODE.md","x":220,"y":-120,"width":360,"height":220},
+		{"id":"contract","type":"file","file":"modules/00_intake/CONTRACT.md","x":180,"y":180,"width":260,"height":150},
+		{"id":"gate","type":"file","file":"modules/00_intake/GATE.md","x":500,"y":180,"width":260,"height":150},
+		{"id":"human","type":"text","text":"HUMAN\\n补充高影响决策\\n再回到 00_intake","x":940,"y":-160,"width":300,"height":180},
+		{"id":"end","type":"text","text":"END\\n配置足够，进入下一阶段\\n或初始化终止","x":940,"y":160,"width":300,"height":180},
+		{"id":"runs","type":"text","text":".runs/<run-id>/\\n运行状态面\\n- manifest.json\\n- current-node.md\\n- gate-result.md\\n- artifacts/","x":-280,"y":110,"width":360,"height":220},
+		{"id":"loop_md","type":"file","file":"LOOP.md","x":-1280,"y":-455,"width":360,"height":260},
+		{"id":"root_agents","type":"file","file":"AGENTS.md","x":-1460,"y":320,"width":360,"height":180},
+		{"id":"registries","type":"text","text":"Capability Registries\\nskills/registry.md\\nplugins/registry.md\\nagents/registry.md","x":-920,"y":1040,"width":360,"height":180},
+		{"id":"canvas_note","type":"text","text":"Canvas 是视图层\\nLOOP.md + modules/* 才是事实源\\n图变更后同步 Node/Edge Index","x":-2080,"y":160,"width":520,"height":160},
+		{"id":"read_order","type":"text","text":"Agent 读序\\n1. AGENTS.md\\n2. LOOP.md\\n3. active node\\n4. node-local harness\\n5. GATE route","x":-560,"y":-1360,"width":360,"height":220},
+		{"id":"title","type":"text","text":"Agent Workflow Control Plane\\n文本事实源驱动的轻量 loop 编排","x":-1560,"y":-1040,"width":420,"height":120},
+		{"id":"active_node","type":"text","text":"active_node\\nmodules/00_intake/","x":-520,"y":-720,"width":320,"height":140},
+		{"id":"node_agents","type":"file","file":"modules/00_intake/AGENTS.md","x":310,"y":-730,"width":260,"height":150},
+		{"id":"system","type":"file","file":"modules/00_intake/SYSTEM.md","x":1110,"y":-870,"width":260,"height":150}
+	],
+	"edges":[
+		{"id":"agents_to_loop","fromNode":"root_agents","fromSide":"top","toNode":"loop_md","toSide":"bottom","label":"root rules"},
+		{"id":"loop_to_read_order","fromNode":"loop_md","fromSide":"right","toNode":"read_order","toSide":"left","label":"control map"},
+		{"id":"read_to_active","fromNode":"read_order","fromSide":"bottom","toNode":"active_node","toSide":"top","label":"enter"},
+		{"id":"active_to_node","fromNode":"active_node","fromSide":"right","toNode":"node","toSide":"left","label":"active node"},
+		{"id":"node_reads_agents","fromNode":"node","fromSide":"top","toNode":"node_agents","toSide":"bottom","label":"local rules"},
+		{"id":"node_reads_system","fromNode":"node","fromSide":"top","toNode":"system","toSide":"bottom","label":"system prompt"},
+		{"id":"node_reads_contract","fromNode":"node","fromSide":"bottom","toNode":"contract","toSide":"top","label":"I/O contract"},
+		{"id":"node_reads_gate","fromNode":"node","fromSide":"bottom","toNode":"gate","toSide":"top","label":"checkpoint"},
+		{"id":"node_to_runs","fromNode":"node","fromSide":"left","toNode":"runs","toSide":"right","label":"write state"},
+		{"id":"registries_to_node","fromNode":"registries","fromSide":"right","toNode":"node","toSide":"left","label":"capabilities"},
+		{"id":"gate_pause_human","fromNode":"gate","fromSide":"right","toNode":"human","toSide":"left","label":"pause"},
+		{"id":"human_back_active","fromNode":"human","fromSide":"left","toNode":"active_node","toSide":"right","label":"answer -> update harness"},
+		{"id":"gate_pass_end","fromNode":"gate","fromSide":"right","toNode":"end","toSide":"left","label":"pass"},
+		{"id":"gate_fail_end","fromNode":"gate","fromSide":"right","toNode":"end","toSide":"left","label":"fail"},
+		{"id":"loop_to_note","fromNode":"loop_md","fromSide":"bottom","toNode":"canvas_note","toSide":"left","label":"source of truth"}
+	]
+}

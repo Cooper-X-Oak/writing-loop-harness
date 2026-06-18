@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-06-18T09:43:15.514Z",
+  "graph": {
+    "nodes": [
+      {
+        "id": "00_intake",
+        "folder": "modules/00_intake",
+        "purpose": "需求拷问与配置初始化",
+        "gate": "modules/00_intake/GATE.md"
+      }
+    ],
+    "edges": [
+      {
+        "from": "00_intake",
+        "outcome": "pass",
+        "to": "END",
+        "meaning": "当前 loop 配置已经足够指导下一步实现或执行"
+      },
+      {
+        "from": "00_intake",
+        "outcome": "pause",
+        "to": "HUMAN",
+        "meaning": "需要人类补充高影响决策"
+      },
+      {
+        "from": "00_intake",
+        "outcome": "fail",
+        "to": "END",
+        "meaning": "初始化被终止，或事实源结构损坏到无法继续"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "id": "00_intake",
+      "folder": "modules/00_intake",
+      "purpose": "需求拷问与配置初始化",
+      "gate": "modules/00_intake/GATE.md",
+      "files": [
+        {
+          "name": "AGENTS.md",
+          "path": "modules/00_intake/AGENTS.md",
+          "exists": true
+        },
+        {
+          "name": "NODE.md",
+          "path": "modules/00_intake/NODE.md",
+          "exists": true
+        },
+        {
+          "name": "SYSTEM.md",
+          "path": "modules/00_intake/SYSTEM.md",
+          "exists": true
+        },
+        {
+          "name": "CONTRACT.md",
+          "path": "modules/00_intake/CONTRACT.md",
+          "exists": true
+        },
+        {
+          "name": "GATE.md",
+          "path": "modules/00_intake/GATE.md",
+          "exists": true
+        }
+      ]
+    }
+  ],
+  "registries": [
+    {
+      "path": "skills/registry.md",
+      "exists": true
+    },
+    {
+      "path": "plugins/registry.md",
+      "exists": true
+    },
+    {
+      "path": "agents/registry.md",
+      "exists": true
+    }
+  ]
+}

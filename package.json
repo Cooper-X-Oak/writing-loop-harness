@@ -1,0 +1,24 @@
+{
+  "name": "writing-loop-harness",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "File-based declarative agent workflow control plane with an XYFlow viewer and local Codex CLI panel.",
+  "type": "module",
+  "scripts": {
+    "validate": "node tools/validate-loop.mjs",
+    "sync:canvas": "node tools/sync-canvas.mjs",
+    "export:app": "node tools/export-workflow.mjs",
+    "dev": "vite --config vite.config.js",
+    "scaffold:node": "node tools/scaffold-node.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^6.0.2",
+    "@xyflow/react": "^12.11.0",
+    "lucide-react": "^1.21.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "vite": "^8.0.16"
+  }
+}
