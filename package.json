@@ -11,6 +11,9 @@
     "export:app": "node tools/export-workflow.mjs",
     "dev": "vite --config vite.config.js",
     "scaffold:node": "node tools/scaffold-node.mjs",
+    "run:start": "node tools/run-workflow.mjs start",
+    "run:step": "node tools/run-workflow.mjs step",
+    "run:inspect": "node tools/run-workflow.mjs inspect",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {

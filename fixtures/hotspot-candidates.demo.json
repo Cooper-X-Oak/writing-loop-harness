@@ -1,0 +1,39 @@
+[
+  {
+    "title": "Community backlash after a major AI coding tool changes its free tier",
+    "sourceUrls": [
+      "https://example.com/community-thread",
+      "https://example.com/product-changelog"
+    ],
+    "firstSeenAt": "2026-06-19T08:00:00+08:00",
+    "freshnessHours": 3,
+    "communitySignal": "Multiple developer communities are discussing the pricing and workflow impact within the last 6 hours.",
+    "conflictOrImpact": "The change affects daily coding workflows and creates visible tension between power users and the product team.",
+    "paperOnly": false,
+    "duplicateRisk": false
+  },
+  {
+    "title": "New benchmark claims better long-context retrieval",
+    "sourceUrls": [
+      "https://example.com/benchmark-paper"
+    ],
+    "firstSeenAt": "2026-06-19T07:00:00+08:00",
+    "freshnessHours": 4,
+    "communitySignal": "No visible community traction yet.",
+    "conflictOrImpact": "Method and benchmark update only; useful as background material.",
+    "paperOnly": true,
+    "duplicateRisk": false
+  },
+  {
+    "title": "Duplicate demo topic already covered yesterday",
+    "sourceUrls": [
+      "https://example.com/duplicate-topic"
+    ],
+    "firstSeenAt": "2026-06-19T06:30:00+08:00",
+    "freshnessHours": 5,
+    "communitySignal": "Some discussion exists, but the topic overlaps with prior coverage.",
+    "conflictOrImpact": "Potentially relevant, but duplicate risk makes it a poor cold-start use of recommendation traffic.",
+    "paperOnly": false,
+    "duplicateRisk": true
+  }
+]

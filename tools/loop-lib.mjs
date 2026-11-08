@@ -18,6 +18,10 @@ function readText(path) {
   return readFileSync(path, 'utf8')
 }
 
+export function readProjectText(projectRoot, relativePath) {
+  return readText(resolve(projectRoot, relativePath))
+}
+
 export function readLoop(projectRoot) {
   const loopPath = resolve(projectRoot, 'LOOP.md')
   if (!existsSync(loopPath)) throw new Error(`missing LOOP.md: ${loopPath}`)
@@ -63,6 +67,26 @@ export function parseWorkflow(markdown) {
   })).filter(edge => edge.from && edge.outcome && edge.to)
 
   return { nodes, edges }
+}
+
+export function activeNodeFromLoop(markdown, workflow = parseWorkflow(markdown)) {
+  const match = markdown.match(/active_node:\s*`?([^`\r\n]+)`?/)
+  if (!match) return workflow.nodes[0]?.id || null
+  const active = stripCell(match[1]).replace(/\/$/, '')
+  const byFolder = workflow.nodes.find(node => node.folder.replace(/\/$/, '') === active)
+  if (byFolder) return byFolder.id
+  const byModuleFolder = workflow.nodes.find(node => `modules/${node.id}` === active)
+  if (byModuleFolder) return byModuleFolder.id
+  const byId = workflow.nodes.find(node => node.id === active)
+  return byId?.id || null
+}
+
+export function nodeById(workflow, nodeId) {
+  return workflow.nodes.find(node => node.id === nodeId) || null
+}
+
+export function routeForOutcome(workflow, nodeId, outcome) {
+  return workflow.edges.find(edge => edge.from === nodeId && edge.outcome === outcome) || null
 }
 
 export function readGateOutcomes(projectRoot, gatePath) {

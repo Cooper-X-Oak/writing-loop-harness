@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react'
 import { spawn } from 'node:child_process'
-import { createReadStream, existsSync } from 'node:fs'
-import { normalize, resolve } from 'node:path'
+import { createReadStream, existsSync, readFileSync, readdirSync } from 'node:fs'
+import { join, normalize, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import { writeWorkflowData } from './tools/export-workflow.mjs'
@@ -29,6 +29,34 @@ function readJsonBody(request) {
 function sendJson(response, status, data) {
   response.writeHead(status, { 'content-type': 'application/json; charset=utf-8' })
   response.end(`${JSON.stringify(data, null, 2)}\n`)
+}
+
+function readJsonFile(path) {
+  return JSON.parse(readFileSync(path, 'utf8'))
+}
+
+function latestRun() {
+  const runsRoot = resolve(projectRoot, '.runs')
+  if (!existsSync(runsRoot)) return null
+  const runs = readdirSync(runsRoot, { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => {
+      const manifestPath = join(runsRoot, entry.name, 'manifest.json')
+      if (!existsSync(manifestPath)) return null
+      return readJsonFile(manifestPath)
+    })
+    .filter(Boolean)
+    .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')))
+  return runs[0] || null
+}
+
+function readRunEvents(runId) {
+  const eventsPath = resolve(projectRoot, '.runs', runId, 'events.jsonl')
+  if (!existsSync(eventsPath)) return []
+  return readFileSync(eventsPath, 'utf8')
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map(line => JSON.parse(line))
 }
 
 function runCodex(prompt) {
@@ -101,6 +129,22 @@ function workflowHarnessPlugin() {
             prompt,
           ].join('\n'))
           sendJson(response, 200, result)
+        } catch (error) {
+          sendJson(response, 500, { error: error.message })
+        }
+      })
+
+      server.middlewares.use('/api/runs/latest', (request, response) => {
+        if (request.method !== 'GET') {
+          sendJson(response, 405, { error: 'method not allowed' })
+          return
+        }
+        try {
+          const run = latestRun()
+          sendJson(response, 200, {
+            run,
+            events: run ? readRunEvents(run.runId).slice(-12) : [],
+          })
         } catch (error) {
           sendJson(response, 500, { error: error.message })
         }

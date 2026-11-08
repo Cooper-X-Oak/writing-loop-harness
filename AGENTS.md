@@ -30,6 +30,8 @@ kind: directive
 
 - `LOOP.md`：全局地图、节点索引、边索引、状态策略和维护协议。
 - `modules/`：纯文本 loop 节点，不是源码包。
+- `schemas/`：节点 JSON artifact 的结构校验，不放业务样本或真实数据。
+- `fixtures/`：可提交的合成调试输入，只用于 dry-run 数据流验证。
 - `canvas/`：流程图和画布视图，不能替代 `LOOP.md`。
 - `app/`：控制平面前端，只读展示 workflow，不替代 `LOOP.md`；右侧 Codex CLI 面板默认 read-only。
 - `skills/`、`plugins/`、`agents/`：registry，不复制外部工具的大段说明。

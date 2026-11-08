@@ -1,0 +1,36 @@
+{
+  "topicTitle": "Community backlash after a major AI coding tool changes its free tier",
+  "sources": [
+    {
+      "title": "Official product changelog",
+      "url": "https://example.com/product-changelog",
+      "sourceType": "original",
+      "capturedAt": "2026-06-19T09:00:00+08:00",
+      "keyClaim": "The product changed its free-tier limits for high-volume users.",
+      "credibility": "primary source",
+      "usable": true
+    },
+    {
+      "title": "Community discussion thread",
+      "url": "https://example.com/community-thread",
+      "sourceType": "community",
+      "capturedAt": "2026-06-19T09:05:00+08:00",
+      "keyClaim": "Developers report workflow disruption and debate the pricing change.",
+      "credibility": "secondary sentiment source",
+      "usable": true
+    },
+    {
+      "title": "Unverified repost",
+      "url": "https://example.com/unverified-repost",
+      "sourceType": "repost",
+      "capturedAt": "2026-06-19T09:10:00+08:00",
+      "keyClaim": "A repost repeats the claim without adding primary evidence.",
+      "credibility": "low-value secondary source",
+      "usable": false
+    }
+  ],
+  "gaps": [
+    "Need exact rollout date from official source before final draft.",
+    "Need direct quote or source capture for the product team's stated rationale."
+  ]
+}

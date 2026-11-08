@@ -82,6 +82,14 @@ app/
   - 读取生成的 workflow-data.json
   - 右侧提供本机 Codex CLI Agent 对话面板
 
+schemas/
+  - 节点 JSON artifact 的结构校验
+  - 命名规则：<node-id>.<artifact-name>.schema.json
+
+fixtures/
+  - 可提交的合成调试输入
+  - 只用于 dry-run 数据流验证，不代表真实热点或账号数据
+
 skills/registry.md
 plugins/registry.md
 agents/registry.md
@@ -91,7 +99,7 @@ agents/registry.md
   - 可公开的环境变量名
 ```
 
-`tools/` 只放通用辅助脚本，不承载业务语义。当前 v1 的工具只做 validate / sync / export / scaffold / dev server。
+`tools/` 只放通用辅助脚本，不承载业务语义。当前工具支持 validate / sync / export / scaffold / dev server / run state runner。
 `canvas/` 只用于可视化管理，`LOOP.md` 和 `modules/*` 才是事实源。
 `app/` 只用于查看控制平面，不能手写 workflow 事实。右侧 Codex CLI 面板通过本地 Vite bridge 调用 `codex exec`。本机 Windows read-only sandbox 可能不可用，默认以 `CODEX_BRIDGE_SANDBOX` 或 `danger-full-access` 启动，并通过提示词约束只读不改文件。
 
@@ -140,22 +148,111 @@ npm run sync:canvas
 npm run export:app
 npm run dev
 npm run scaffold:node -- <node-id> "<Node Title>"
+npm run run:start -- --run <run-id> --node <node-id>
+npm run run:step -- --run <run-id>
+npm run run:step -- --run <run-id> --fixture fixtures/hotspot-candidates.demo.json
+npm run run:step -- --run <run-id> --exec
+npm run run:inspect -- --run <run-id>
 npm test
 ```
 
-这些命令只检查和维护文本 harness，不执行业务工作流。`npm run dev` 会启动前端和本地 Codex bridge；只有你在右侧面板点击 Send 时才会调用 `codex exec`。
+`run:step` 默认 dry-run，只验证 prompt 组装、gate 记录和路由。显式加 `--exec` 才会调用本机 `codex exec` 执行当前节点。
+
+`npm run dev` 会启动前端和本地 Codex bridge；只有你在右侧面板点击 Send 时才会调用 `codex exec`。
+
+## 试跑一个 loop
+
+先启动前端：
+
+```powershell
+npm run dev
+```
+
+再跑 dry-run，确认控制平面能走通：
+
+```powershell
+npm run run:start -- --run smoke-001 --node 10_hotspot_scan
+npm run run:step -- --run smoke-001 --outcome pass
+npm run run:inspect -- --run smoke-001
+```
+
+预期结果：
+
+- `.runs/smoke-001/manifest.json` 存在；
+- `.runs/smoke-001/events.jsonl` 存在；
+- `.runs/smoke-001/nodes/10_hotspot_scan/prompt.md` 存在；
+- `.runs/smoke-001/nodes/10_hotspot_scan/gate-result.json` 存在；
+- manifest 里的 `currentNode` 变成 `20_topic_gate`。
+- 前端画布顶部显示最新 run；
+- `10_hotspot_scan` 节点显示 `pass`；
+- `20_topic_gate` 节点显示 `current`；
+- `10_hotspot_scan / pass -> 20_topic_gate` 边加粗高亮。
+- 前端顶部显示最近过程事件，如 `prompt_assembled`、`gate_recorded`、`routed`。
+
+如果 gate JSON 里声明了 artifact，例如：
+
+```json
+{
+  "outcome": "pass",
+  "reason": "candidate scan complete",
+  "artifacts": ["candidates.json"]
+}
+```
+
+runner 会查找：
+
+```text
+schemas/10_hotspot_scan.candidates.schema.json
+```
+
+有匹配 schema 时，校验结果会写进 `gate-result.json` 的 `artifactValidation` 字段。
+
+要让本机 Codex 真执行当前节点：
+
+```powershell
+npm run run:start -- --run live-001 --node 10_hotspot_scan
+npm run run:step -- --run live-001 --exec
+```
+
+真实执行仍然只写 `.runs/<run-id>/`。如果节点缺少真实 source registry、writer adapter、image provider 或必要人工决策，正确 outcome 应该是 `pause`，而不是硬编业务结果。
+
+## 试跑数据流
+
+用合成 fixture 跑到资料采集：
+
+```powershell
+npm run run:start -- --run data-demo-001 --node 10_hotspot_scan
+npm run run:step -- --run data-demo-001 --fixture fixtures/hotspot-candidates.demo.json
+npm run run:step -- --run data-demo-001
+npm run run:step -- --run data-demo-001 --fixture fixtures/source-inventory.demo.json
+npm run run:inspect -- --run data-demo-001
+```
+
+预期结果：
+
+- `10_hotspot_scan` 写入 `.runs/data-demo-001/nodes/10_hotspot_scan/candidates.json`；
+- `10_hotspot_scan` 的 `gate-result.json` 里 `artifactValidation[0].ok` 为 `true`；
+- `20_topic_gate` 读取上游 `candidates.json`；
+- `20_topic_gate` 写入 `topic-scorecard.json` 和 `selected-topic.md`；
+- `topic-scorecard.json` 通过 `schemas/20_topic_gate.topic-scorecard.schema.json` 校验；
+- `30_source_collect` 读取上游 `topic-scorecard.json`；
+- `30_source_collect` 写入 `source-inventory.json`、`source-inventory.md` 和 `source-gaps.md`；
+- `source-inventory.json` 通过 `schemas/30_source_collect.source-inventory.schema.json` 校验；
+- 前端能看到三步路由和过程事件。
 
 ## 当前仓库状态
 
-现在仓库只有一个最小 harness 骨架：
+现在仓库是一个可校验、可视化、可 dry-run 路由的热点写作 harness：
 
 - `LOOP.md`：当前架构地图和索引。
 - `AGENTS.md`：根 agent 约束。
-- `modules/00_intake/`：当前唯一已初始化节点，用来拷问需求并更新 loop 配置。
+- `modules/*`：热点写作 loop 的 8 个节点。
+- `schemas/`：节点 JSON artifact schema。
+- `fixtures/`：合成调试输入。
 - `canvas/`：流程图和人类画布视图。
 - `app/`：自研控制平面前端。
 - `skills/`、`plugins/`、`agents/`：依赖 registry。
-- `tools/`：薄辅助工具，只做校验、同步和节点脚手架。
+- `tools/`：薄辅助工具，包含校验、同步、节点脚手架和最小 runner。
 - `tests/`：工具层测试。
 
-当前还没有真实业务 loop。人类上手时，第一步不是运行代码，而是让 agent 根据本 README 和 `00_intake` 开始追问，并把答案沉淀进正确的事实源。
+当前还没有绑定真实 source registry、writer adapter、image provider 或调用方内容仓路径。人类上手时，第一步是 dry-run 控制流；第二步才是把真实输入源逐个接进对应节点契约。

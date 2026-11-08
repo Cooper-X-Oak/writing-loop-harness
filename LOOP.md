@@ -9,6 +9,8 @@
 - `LOOP.md` 定义当前 workflow 地图、节点索引、边索引和全局维护协议。
 - `modules/*` 定义节点本地 harness，是每个环节的细则事实源。
 - `GATE.md` 定义节点检查点和路由 outcome。
+- `schemas/*` 定义节点 JSON artifact 的结构校验，不承载业务样本。
+- `fixtures/*` 提供可提交的合成调试输入，用于 dry-run 数据流验证。
 - agent 是执行引擎，按图进入 active node 并读取节点本地文件。
 - `tools/*` 只是薄辅助层，用于校验结构、同步可视化投影、创建节点五件套。
 - `app/*` 是基于 `@xyflow/react` 的自研前端视图层，用来查看控制平面，不是事实源。
@@ -137,7 +139,13 @@ Agent 接手后按这个顺序行动：
 .runs/<run-id>/
   manifest.json
   current-node.md
+  events.jsonl
   nodes/<node-id>/
+    prompt.md
+    stdout.md
+    stderr.md
+    final.md
+    gate-result.json
     gate-result.md
     artifacts/
     notes.md
@@ -147,6 +155,9 @@ Agent 接手后按这个顺序行动：
 
 - `.runs/` 不提交 git。
 - active node、gate 结果、产物路径、恢复提示写入 run state。
+- 过程事件追加写入 `events.jsonl`，用于调试 prompt 组装、执行、gate 记录和路由。
+- 节点 JSON artifact 如有匹配的 `schemas/<node-id>.<artifact-name>.schema.json`，runner 必须记录校验结果。
+- `fixtures/` 只能用于本地 dry-run，不代表真实热点、账号数据或发布依据。
 - 修改 workflow 结构时才更新 `LOOP.md`。
 - 修改节点细则时只更新对应 `modules/<node>/`。
 
@@ -168,6 +179,7 @@ Agent 接手后按这个顺序行动：
 - `canvas/loop.canvas` 是人类自由画布视图。
 - `app/workflow-data.json` 由 `tools/export-workflow.mjs` 生成，供 `@xyflow/react` 前端读取。
 - 前端右侧 Codex CLI 面板通过 Vite 本地 bridge 调用 `codex exec`，不替代主 agent 会话。本机 Windows read-only sandbox 可能不可用，默认以 `CODEX_BRIDGE_SANDBOX` 或 `danger-full-access` 启动，并通过提示词约束只读不改文件。
+- 前端通过 `/api/runs/latest` 只读投影 `.runs/<run-id>/manifest.json` 和 `events.jsonl`，用于显示节点状态、当前节点、最近路由、过程事件和 gate outcome 颜色；这些反馈不是 workflow 事实源。
 - 如果视图层和本文件冲突，以本文件和 `modules/*` 为准。
 
 ## Tools
@@ -178,12 +190,17 @@ npm run sync:canvas
 npm run export:app
 npm run dev
 npm run scaffold:node -- <node-id> "<Node Title>"
+npm run run:start -- --run <run-id> --node <node-id>
+npm run run:step -- --run <run-id>
+npm run run:step -- --run <run-id> --fixture fixtures/hotspot-candidates.demo.json
+npm run run:step -- --run <run-id> --exec
+npm run run:inspect -- --run <run-id>
 npm test
 ```
 
 工具层不得：
 
-- 自动调用模型；
+- 默认不得自动调用模型。`run:step` 默认 dry-run；只有显式 `--exec` 才可调用本机 Codex CLI；
 - 写平台账号/发布流程；
 - 成为 workflow 事实源；
 - 替代 agent 执行节点任务。

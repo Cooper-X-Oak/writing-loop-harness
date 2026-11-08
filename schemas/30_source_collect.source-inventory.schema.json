@@ -1,0 +1,66 @@
+{
+  "type": "object",
+  "required": [
+    "topicTitle",
+    "sources",
+    "gaps"
+  ],
+  "properties": {
+    "topicTitle": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "url",
+          "sourceType",
+          "capturedAt",
+          "keyClaim",
+          "credibility",
+          "usable"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceType": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capturedAt": {
+            "type": "string",
+            "minLength": 1
+          },
+          "keyClaim": {
+            "type": "string",
+            "minLength": 1
+          },
+          "credibility": {
+            "type": "string",
+            "minLength": 1
+          },
+          "usable": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

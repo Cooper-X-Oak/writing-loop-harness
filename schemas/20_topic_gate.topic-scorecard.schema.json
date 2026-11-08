@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "required": [
+    "chosenTitle",
+    "selectionReason",
+    "interactionPotential",
+    "duplicateCheck",
+    "paperSourceDecision",
+    "dailyBudgetDecision",
+    "rejectedAlternatives"
+  ],
+  "properties": {
+    "chosenTitle": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selectionReason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interactionPotential": {
+      "type": "string",
+      "minLength": 1
+    },
+    "duplicateCheck": {
+      "type": "string",
+      "minLength": 1
+    },
+    "paperSourceDecision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dailyBudgetDecision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rejectedAlternatives": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

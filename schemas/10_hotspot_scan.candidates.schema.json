@@ -1,0 +1,52 @@
+{
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "required": [
+      "title",
+      "sourceUrls",
+      "firstSeenAt",
+      "freshnessHours",
+      "communitySignal",
+      "conflictOrImpact",
+      "paperOnly",
+      "duplicateRisk"
+    ],
+    "properties": {
+      "title": {
+        "type": "string",
+        "minLength": 1
+      },
+      "sourceUrls": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "firstSeenAt": {
+        "type": "string",
+        "minLength": 1
+      },
+      "freshnessHours": {
+        "type": "number"
+      },
+      "communitySignal": {
+        "type": "string",
+        "minLength": 1
+      },
+      "conflictOrImpact": {
+        "type": "string",
+        "minLength": 1
+      },
+      "paperOnly": {
+        "type": "boolean"
+      },
+      "duplicateRisk": {
+        "type": "boolean"
+      }
+    }
+  }
+}

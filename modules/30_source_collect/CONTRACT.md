@@ -15,6 +15,7 @@
 ## Artifacts
 
 - `.runs/<run-id>/nodes/30_source_collect/sources/`
+- `.runs/<run-id>/nodes/30_source_collect/source-inventory.json`
 - `.runs/<run-id>/nodes/30_source_collect/source-inventory.md`
 - `.runs/<run-id>/nodes/30_source_collect/source-gaps.md`
 
